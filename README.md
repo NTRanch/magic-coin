@@ -4,8 +4,26 @@ A clean-room, from-measurement reimplementation of the systems of
 **Magic Coin** (DLsite RJ318915; Unity, Mono), built for the Torogao
 remake programme by Nice Thoughts Ranch. No assets, text, or code from
 the studied game are included: every constant in
-`data/coin-dynamics.ron` was measured from the original's behaviour and
-rebuilt as estate-authored data and Rust systems.
+`crates/torogao-coin/data/coin-dynamics.ron` was measured from the
+original's behaviour and rebuilt as estate-authored data and Rust
+systems.
+
+## Repository shape
+
+This repository is a standalone Cargo workspace with two crates:
+
+- `crates/torogao-coin` — the systems crate (below), carrying the
+  `coin-smoke` and `coin-play` binaries.
+- `crates/torogao-coin-android` — the Android spike shell: the coin
+  fixture running inside a winit NativeActivity window (Torogao
+  D-212 Route 1). Not the Torogao app; no rendering beyond a
+  success-colour fill.
+
+The shape mirrors the Torogao workspace (Owner ruling D-1568,
+2026-11-16), where this work was built and gated. The Torogao
+graphical app host lives in the Torogao repository and consumes
+`torogao-coin` from there; the dependency runs app → coin, never
+the reverse, so the host is not part of this artefact.
 
 ## What the crate models
 
@@ -20,8 +38,9 @@ rebuilt as estate-authored data and Rust systems.
 ## Dual-target law
 
 The remake programme ships every title on native Linux **and** Android
-from this one crate plus its data file. Platform shells bind to the
-crate; the systems and data live here only.
+from this workspace. The systems and data live in `torogao-coin` only;
+platform shells (the Android spike shell here, the Torogao app host
+in its own repository) bind to the crate.
 
 ## Determinism
 
@@ -35,7 +54,8 @@ must match on Linux and Android (the programme's S7 gate).
 ```sh
 cargo build
 cargo test
-cargo run --bin coin-smoke   # scripted session; prints the smoke line
+cargo run -p torogao-coin --bin coin-smoke   # scripted session; prints the smoke line
+cargo run -p torogao-coin --bin coin-play    # playable day loop (line protocol on stdin/stdout)
 ```
 
 ## License
